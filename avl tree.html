@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AVL Tree Visual</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#e8f5e9;
+    font-family:Arial;
+}
+
+.box{
+    background:#ffffff;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+input{
+    padding:10px;
+    width:180px;
+    border-radius:6px;
+    border:1px solid #aaa;
+}
+
+svg{
+    margin-top:15px;
+    background:#f1f8e9;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h3>AVL Tree</h3>
+    <input id="i" placeholder="Enter value">
+    <svg id="s" width="600" height="350"></svg>
+</div>
+
+<script>
+class N{
+    constructor(v){
+        this.v=v
+        this.l=null
+        this.r=null
+        this.h=1
+    }
+}
+
+let r=null
+
+function h(n){ return n?n.h:0 }
+function bf(n){ return n?h(n.l)-h(n.r):0 }
+
+function rr(y){
+    let x=y.l,t=x.r
+    x.r=y; y.l=t
+    y.h=1+Math.max(h(y.l),h(y.r))
+    x.h=1+Math.max(h(x.l),h(x.r))
+    return x
+}
+
+function lr(x){
+    let y=x.r,t=y.l
+    y.l=x; x.r=t
+    x.h=1+Math.max(h(x.l),h(x.r))
+    y.h=1+Math.max(h(y.l),h(y.r))
+    return y
+}
+
+function ins(n,v){
+    if(!n) return new N(v)
+    if(v<n.v) n.l=ins(n.l,v)
+    else if(v>n.v) n.r=ins(n.r,v)
+
+    n.h=1+Math.max(h(n.l),h(n.r))
+    let b=bf(n)
+
+    if(b>1 && v<n.l.v) return rr(n)
+    if(b<-1 && v>n.r.v) return lr(n)
+    if(b>1 && v>n.l.v){ n.l=lr(n.l); return rr(n) }
+    if(b<-1 && v<n.r.v){ n.r=rr(n.r); return lr(n) }
+
+    return n
+}
+
+function draw(n,x,y,g){
+    if(!n) return
+    let d=70
+
+    if(n.l){
+        line(x,y,x-d,y+70)
+        draw(n.l,x-d,y+70)
+    }
+    if(n.r){
+        line(x,y,x+d,y+70)
+        draw(n.r,x+d,y+70)
+    }
+
+    circ(x,y,n.v,bf(n))
+}
+
+function circ(x,y,v,b){
+    s.innerHTML+=`
+    <circle cx="${x}" cy="${y}" r="18" fill="#c5e1a5" stroke="#558b2f"/>
+    <text x="${x}" y="${y+5}" text-anchor="middle" font-size="12">${v}</text>
+    <text x="${x+22}" y="${y-18}" font-size="10">${b}</text>`
+}
+
+function line(x1,y1,x2,y2){
+    s.innerHTML+=`<line x1="${x1}" y1="${y1}"
+    x2="${x2}" y2="${y2}" stroke="#555"/>`
+}
+
+function upd(){
+    s.innerHTML=""
+    if(r) draw(r,300,40)
+}
+
+i.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+        let v=parseInt(i.value)
+        if(!isNaN(v)){
+            r=ins(r,v)
+            upd()
+            i.value=""
+        }
+    }
+})
+</script>
+
+</body>
+</html>
